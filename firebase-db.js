@@ -57,3 +57,18 @@ async function syncAllToFirebase(products) {
     console.warn('Firebase batch sync error:', e.message);
   }
 }
+
+// ──────── Subir imagen a Firebase Storage ────────
+// Guarda en: products/{productId}/{timestamp}_{filename}
+// Retorna: URL de descarga pública.
+async function uploadProductImage(file, productId) {
+  if (typeof storage === 'undefined') {
+    throw new Error('Firebase Storage no está disponible');
+  }
+  const timestamp = Date.now();
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const path = `products/${productId}/${timestamp}_${safeName}`;
+  const ref = storage.ref(path);
+  const snapshot = await ref.put(file);
+  return await snapshot.ref.getDownloadURL();
+}

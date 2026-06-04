@@ -18,4 +18,5 @@ firebase.initializeApp(firebaseConfig);
 // Referencias globales (usadas por firebase-db.js y los HTML)
 const db = firebase.firestore();
 const auth = firebase.auth();
+const storage = firebase.storage();
 const PRODUCTS_COLLECTION = 'products';

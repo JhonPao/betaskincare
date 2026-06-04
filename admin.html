@@ -610,6 +610,61 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* File upload area */
+        .file-upload-area {
+            border: 2px dashed var(--color-primary-light);
+            border-radius: var(--radius-md);
+            padding: 32px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            background: var(--color-bg);
+        }
+        .file-upload-area:hover {
+            border-color: var(--color-primary);
+            background: var(--color-primary-light);
+        }
+        .file-upload-placeholder span {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .file-upload-placeholder p {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+            font-weight: 500;
+        }
+        .file-upload-placeholder small {
+            font-size: 0.75rem;
+            color: var(--color-text-muted);
+        }
+        .image-preview {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--color-bg);
+            border-radius: var(--radius-md);
+        }
+        .image-preview img {
+            width: 64px;
+            height: 64px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+        .image-preview .remove-image-btn {
+            font-size: 0.75rem;
+            color: var(--color-danger);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .image-preview .remove-image-btn:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -806,9 +861,22 @@
                         <option value="10-15 días hábiles">10-15 días hábiles</option>
                     </select>
                 </div>
+                <input type="hidden" id="productImage" value="">
                 <div class="form-group">
-                    <label>URL de Imagen</label>
-                    <input type="url" id="productImage" placeholder="https://...">
+                    <label>Imagen del Producto</label>
+                    <div class="file-upload-area" id="fileUploadArea" onclick="document.getElementById('productImageFile').click()">
+                        <input type="file" id="productImageFile" accept="image/*" hidden>
+                        <div class="file-upload-placeholder">
+                            <span>📁</span>
+                            <p>Haz clic para seleccionar imagen</p>
+                            <small>PNG, JPG, WEBP · Máx 5 MB</small>
+                        </div>
+                    </div>
+                    <div class="image-preview" id="imagePreviewContainer" style="display:none;">
+                        <img id="imagePreview" src="" alt="Preview">
+                        <span style="flex:1;font-size:0.85rem;color:var(--color-text-light);" id="imagePreviewName"></span>
+                        <button type="button" class="remove-image-btn" onclick="removeSelectedImage()">✕ Eliminar</button>
+                    </div>
                 </div>
                 <button type="submit" class="submit-btn">Guardar Producto</button>
             </form>
@@ -819,6 +887,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-storage-compat.js"></script>
     <script src="firebase-config.js"></script>
     <script src="firebase-db.js"></script>
     <script>
@@ -1010,6 +1079,8 @@
             document.getElementById('productDelivery').value = 'inmediata';
             document.getElementById('productShipping').value = '3-5 días hábiles';
             document.getElementById('productImage').value = '';
+            document.getElementById('productImageFile').value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
             document.getElementById('shippingTimeGroup').style.display = 'none';
             document.getElementById('productModal').classList.add('active');
         }
@@ -1024,12 +1095,64 @@
             document.getElementById('shippingTimeGroup').style.display = delivery === 'distribuidor' ? 'block' : 'none';
         }
 
-        function handleSaveProduct(e) {
+        function removeSelectedImage() {
+            document.getElementById('productImageFile').value = '';
+            document.getElementById('productImage').value = '';
+            document.getElementById('imagePreviewContainer').style.display = 'none';
+        }
+
+        // Mostrar preview al seleccionar archivo
+        document.addEventListener('change', function (e) {
+            if (e.target && e.target.id === 'productImageFile') {
+                const file = e.target.files[0];
+                if (!file) return;
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('La imagen supera los 5 MB. Selecciona una más pequeña.');
+                    e.target.value = '';
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (ev) {
+                    document.getElementById('imagePreview').src = ev.target.result;
+                    document.getElementById('imagePreviewName').textContent = file.name;
+                    document.getElementById('imagePreviewContainer').style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        async function handleSaveProduct(e) {
             e.preventDefault();
 
             const products = getProducts();
             const category = document.getElementById('productCategory').value;
             const delivery = document.getElementById('productDelivery').value;
+            const fileInput = document.getElementById('productImageFile');
+            const btn = document.querySelector('#productModal .btn-primary');
+            const originalText = btn.textContent;
+
+            let imageUrl = document.getElementById('productImage').value;
+
+            // Subir imagen si se seleccionó un archivo nuevo
+            if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('La imagen supera los 5 MB. Selecciona una más pequeña.');
+                    return;
+                }
+                btn.textContent = 'Subiendo imagen...';
+                btn.disabled = true;
+                try {
+                    const tmpId = editingProductId || 'temp_' + Date.now();
+                    imageUrl = await uploadProductImage(file, tmpId);
+                } catch (uploadErr) {
+                    console.error('Upload error:', uploadErr);
+                    alert('Error al subir la imagen: ' + uploadErr.message);
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                    return;
+                }
+            }
 
             const data = {
                 name: document.getElementById('productName').value,
@@ -1040,7 +1163,7 @@
                 stock: parseInt(document.getElementById('productStock').value) || 0,
                 delivery: delivery,
                 shippingTime: delivery === 'distribuidor' ? document.getElementById('productShipping').value : '',
-                image: document.getElementById('productImage').value || '',
+                image: imageUrl || '',
                 badge: null
             };
 
@@ -1054,6 +1177,7 @@
                 products.push(data);
             }
 
+            btn.textContent = 'Guardando...';
             saveProducts(products);
             if (typeof db !== 'undefined') {
                 const fbData = editingProductId ? { ...data, id: editingProductId } : data;
@@ -1062,6 +1186,8 @@
             closeProductModal();
             renderProducts();
             updateStats();
+            btn.textContent = originalText;
+            btn.disabled = false;
             alert(editingProductId ? '✓ Producto actualizado' : '✓ Producto agregado');
         }
 
@@ -1080,6 +1206,18 @@
             document.getElementById('productDelivery').value = p.delivery || 'inmediata';
             document.getElementById('productShipping').value = p.shippingTime || '3-5 días hábiles';
             document.getElementById('productImage').value = p.image || '';
+            document.getElementById('productImageFile').value = '';
+            // Mostrar preview de imagen existente
+            const previewContainer = document.getElementById('imagePreviewContainer');
+            const previewImg = document.getElementById('imagePreview');
+            const previewName = document.getElementById('imagePreviewName');
+            if (p.image) {
+                previewImg.src = p.image;
+                previewName.textContent = 'Imagen actual';
+                previewContainer.style.display = 'flex';
+            } else {
+                previewContainer.style.display = 'none';
+            }
             toggleShippingField();
             document.getElementById('productModal').classList.add('active');
         }
