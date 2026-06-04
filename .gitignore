@@ -1,0 +1,19 @@
+# OS
+Thumbs.db
+.DS_Store
+desktop.ini
+
+# Editor
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Firebase (nunca subir credenciales reales — firebase-config.js es template)
+# Si personalizas firebase-config.js con tus claves, AÑÁDELO AQUÍ:
+# firebase-config.js
+
+# Logs
+*.log
+npm-debug.log*
