@@ -10,8 +10,9 @@ desktop.ini
 .vscode/
 .idea/
 
-# Firebase (nunca subir credenciales reales — firebase-config.js es template)
-# Si personalizas firebase-config.js con tus claves, AÑÁDELO AQUÍ:
+# Firebase (nunca subir credenciales reales)
+# Cuando reemplaces los placeholders en firebase-config.js con claves reales,
+# descomenta la línea siguiente para evitar subirlas al repositorio:
 # firebase-config.js
 
 # Logs

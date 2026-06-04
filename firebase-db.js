@@ -5,8 +5,6 @@
 // Uso: sincronización entre localStorage y Firestore
 // ═══════════════════════════════════════════════
 
-const PRODUCTS_KEY = 'betaskincare_products';
-
 // ──────── Leer productos desde Firestore ────────
 // Busca en la colección, ordena por id, actualiza localStorage.
 async function syncProductsFromFirebase() {
@@ -15,7 +13,7 @@ async function syncProductsFromFirebase() {
     const snapshot = await db.collection(PRODUCTS_COLLECTION).orderBy('id', 'asc').get();
     if (snapshot.empty) return false;
     const products = snapshot.docs.map(doc => doc.data());
-    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(products));
+    localStorage.setItem('betaskincare_products', JSON.stringify(products));
     return true;
   } catch (e) {
     console.warn('Firebase sync error (lectura):', e.message);
