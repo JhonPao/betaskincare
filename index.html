@@ -571,6 +571,96 @@
             margin: 0 auto;
         }
 
+        /* Buscador */
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 32px;
+            padding: 0 16px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+            background: var(--color-bg-card);
+            border: 1px solid rgba(244, 167, 185, 0.2);
+            border-radius: var(--radius-full);
+            padding: 6px 18px;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .search-bar:focus-within {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(244, 167, 185, 0.15);
+        }
+
+        .search-bar__icon {
+            font-size: 1.1rem;
+            color: var(--color-text-light);
+            margin-right: 10px;
+            user-select: none;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: none;
+            background: none;
+            outline: none;
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--color-text);
+            padding: 8px 0;
+        }
+
+        .search-bar input::placeholder {
+            color: var(--color-text-muted);
+        }
+
+        .search-bar__clear {
+            font-size: 0.9rem;
+            color: var(--color-text-light);
+            cursor: pointer;
+            padding: 4px;
+            margin-left: 8px;
+            background: none;
+            border: none;
+            transition: var(--transition);
+        }
+
+        .search-bar__clear:hover {
+            color: var(--color-primary-dark);
+        }
+
+        .products__empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 64px 24px;
+            background: var(--color-bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px dashed rgba(244, 167, 185, 0.25);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .products__empty-icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 16px;
+        }
+
+        .products__empty-title {
+            font-family: var(--font-heading);
+            font-size: 1.4rem;
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        .products__empty-text {
+            color: var(--color-text-light);
+            font-size: 0.95rem;
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
         /* Filtros */
         .filters {
             display: flex;
@@ -1845,6 +1935,15 @@
                 <p class="products__subtitle">Cuidado esencial: tu rutina K-Beauty empieza con el cuidado de tu piel</p>
             </div>
 
+            <!-- Buscador -->
+            <div class="search-container">
+                <div class="search-bar">
+                    <span class="search-bar__icon">🔍</span>
+                    <input type="text" id="searchInput" placeholder="Buscar productos (ej. COSRX, Protector solar...)" aria-label="Buscar productos">
+                    <button id="searchClear" class="search-bar__clear" style="display: none;" aria-label="Limpiar búsqueda">✕</button>
+                </div>
+            </div>
+
             <!-- Filtros de categorías -->
             <div class="filters">
                 <button class="filter-btn active" data-filter="all">Todos</button>
@@ -2111,10 +2210,42 @@
         // ═══════════════════════════════════════════
         // RENDER PRODUCTOS
         // ═══════════════════════════════════════════
+        let currentCategoryFilter = 'all';
+        let currentSearchQuery = '';
+
         function renderProducts(filter) {
+            if (typeof filter === 'string') {
+                currentCategoryFilter = filter;
+            }
             const products = getProducts();
             const grid = document.getElementById('productsGrid');
-            const filtered = filter === 'all' ? products : products.filter(p => p.category === filter);
+            
+            // 1. Filtrar por categoría
+            let filtered = currentCategoryFilter === 'all' 
+                ? products 
+                : products.filter(p => p.category === currentCategoryFilter);
+
+            // 2. Filtrar por buscador
+            if (currentSearchQuery.trim() !== '') {
+                const query = currentSearchQuery.toLowerCase().trim();
+                filtered = filtered.filter(p => 
+                    p.name.toLowerCase().includes(query) || 
+                    (p.categoryLabel && p.categoryLabel.toLowerCase().includes(query)) ||
+                    (p.badge && p.badge.toLowerCase().includes(query))
+                );
+            }
+
+            // 3. Manejar estado vacío
+            if (filtered.length === 0) {
+                grid.innerHTML = `
+                    <div class="products__empty">
+                        <span class="products__empty-icon">🔍</span>
+                        <h3 class="products__empty-title">No se encontraron productos</h3>
+                        <p class="products__empty-text">Intenta con otra búsqueda o selecciona una categoría diferente.</p>
+                    </div>
+                `;
+                return;
+            }
 
             grid.innerHTML = filtered.map((p, i) => {
                 const finalPrice = p.discount > 0 ? p.price * (1 - p.discount / 100) : p.price;
@@ -2593,6 +2724,33 @@
         }
 
         // ═══════════════════════════════════════════
+        // BUSCADOR
+        // ═══════════════════════════════════════════
+        function initSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchClear = document.getElementById('searchClear');
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', (e) => {
+                currentSearchQuery = e.target.value;
+                if (searchClear) {
+                    searchClear.style.display = currentSearchQuery.length > 0 ? 'inline-block' : 'none';
+                }
+                renderProducts();
+            });
+
+            if (searchClear) {
+                searchClear.addEventListener('click', () => {
+                    searchInput.value = '';
+                    currentSearchQuery = '';
+                    searchClear.style.display = 'none';
+                    renderProducts();
+                    searchInput.focus();
+                });
+            }
+        }
+
+        // ═══════════════════════════════════════════
         // INIT
         // ═══════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
@@ -2671,14 +2829,14 @@
             // Render initial products & cart
             renderProducts('all');
             initFilters();
+            initSearch();
             updateCartBadge();
 
             // Sincronizar desde Firestore (asíncrono, no bloquea)
             if (typeof syncProductsFromFirebase === 'function') syncProductsFromFirebase().then(synced => {
                 if (synced) {
-                    renderProducts('all');
+                    renderProducts();
                     updateCartBadge();
-                    initFilters();
                 }
             });
         });
