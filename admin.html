@@ -30,8 +30,11 @@
             --color-danger: #E74C3C;
             --color-warning: #F39C12;
             --shadow-md: 0 8px 24px rgba(90, 74, 66, 0.10);
+            --radius-sm: 8px;
             --radius-md: 16px;
             --radius-full: 9999px;
+            --transition: 0.3s ease;
+            --color-text-muted: #B0A090;
         }
 
         * {
@@ -665,6 +668,37 @@
         .image-preview .remove-image-btn:hover {
             text-decoration: underline;
         }
+
+        /* Star selector (admin) */
+        .star-selector {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+        }
+        .star-selector__btn {
+            font-size: 1.6rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px 6px;
+            line-height: 1;
+            color: #ddd;
+            transition: color 0.15s;
+            position: relative;
+        }
+        .star-selector__btn.active { color: #f1c40f; }
+        .star-selector__btn.half {
+            background: linear-gradient(to right, #f1c40f 50%, #ddd 50%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .star-selector__value {
+            font-size: 0.85rem;
+            color: var(--color-text-light);
+            margin-left: 8px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -793,16 +827,13 @@
                 <section class="content-section" id="settings">
                     <h2 style="margin-bottom: 24px;">Configuración</h2>
                     <div class="add-product-form">
-                        <h3>Información de la Tienda</h3>
+                        <h3>Envío y Delivery</h3>
                         <div class="form-group">
-                            <label>Nombre</label>
-                            <input type="text" value="BetaSkinCare">
+                            <label>Tarifa de Delivery (S/.)</label>
+                            <input type="number" id="deliveryFeeInput" step="0.5" min="0" value="10">
+                            <small style="color:var(--color-text-muted);font-size:0.75rem;">Costo fijo de entrega a domicilio. 0 = envío gratis.</small>
                         </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email">
-                        </div>
-                        <button class="submit-btn" onclick="alert('✓ Configuración guardada')">Guardar</button>
+                        <button class="submit-btn" onclick="saveSettings()">Guardar</button>
                     </div>
                 </section>
             </main>
@@ -832,7 +863,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Precio (S/.)</label>
-                        <input type="number" id="productPrice" step="0.01" required>
+                        <input type="number" id="productPrice" step="0.01" min="0" required>
                     </div>
                     <div class="form-group">
                         <label>Descuento (%)</label>
@@ -842,7 +873,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Stock</label>
-                        <input type="number" id="productStock" required>
+                        <input type="number" id="productStock" min="0" required>
                     </div>
                     <div class="form-group">
                         <label>Tipo de Entrega</label>
@@ -860,6 +891,32 @@
                         <option value="7-10 días hábiles">7-10 días hábiles</option>
                         <option value="10-15 días hábiles">10-15 días hábiles</option>
                     </select>
+                </div>
+                <div class="form-group">
+                    <label>Badge / Etiqueta</label>
+                    <select id="productBadge">
+                        <option value="">— Sin etiqueta —</option>
+                        <option value="Popular">🔥 Popular</option>
+                        <option value="Nuevo">✨ Nuevo</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Rating (1-5)</label>
+                        <div class="star-selector" id="starSelector">
+                            <button type="button" class="star-selector__btn" data-pos="1">★</button>
+                            <button type="button" class="star-selector__btn" data-pos="2">★</button>
+                            <button type="button" class="star-selector__btn" data-pos="3">★</button>
+                            <button type="button" class="star-selector__btn" data-pos="4">★</button>
+                            <button type="button" class="star-selector__btn" data-pos="5">★</button>
+                            <span class="star-selector__value" id="starSelectorValue">0.0</span>
+                        </div>
+                        <input type="hidden" id="productRating" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Número de Reseñas</label>
+                        <input type="number" id="productReviewCount" min="0" value="0" placeholder="0">
+                    </div>
                 </div>
                 <input type="hidden" id="productImage" value="">
                 <div class="form-group">
@@ -903,21 +960,8 @@
 
         // Plantilla para asegurar que todo producto tenga los campos que index.html espera
         function productTemplate() {
-            return { id: 0, name: '', category: 'sunscreen', categoryLabel: 'Sun Care', price: 0, discount: 0, stock: 0, delivery: 'inmediata', shippingTime: '', image: '', badge: null };
+            return { id: 0, name: '', category: 'sunscreen', categoryLabel: 'Sun Care', price: 0, discount: 0, stock: 0, delivery: 'inmediata', shippingTime: '', image: '', badge: null, rating: 0, reviewCount: 0 };
         }
-
-        const DEFAULT_PRODUCTS = [
-            { id: 1,  name: 'Hyalu-Cica Water-Fit Sun Serum',           category: 'sunscreen', categoryLabel: 'Sun Care',  price: 75, discount: 0,  stock: 10, delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&h=400&fit=crop',        badge: 'Popular' },
-            { id: 2,  name: 'Tone Brightening Tone-Up Sunscreen',       category: 'sunscreen', categoryLabel: 'Sun Care',  price: 75, discount: 0,  stock: 3,  delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=400&fit=crop',        badge: 'Nuevo' },
-            { id: 3,  name: 'Air-Fit Suncream Light',                   category: 'sunscreen', categoryLabel: 'Sun Care',  price: 75, discount: 10, stock: 8,  delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b15?w=400&h=400&fit=crop',        badge: null },
-            { id: 4,  name: 'Tea-Trica Soothing Sun Milk',              category: 'sunscreen', categoryLabel: 'Sun Care',  price: 75, discount: 0,  stock: 0,  delivery: 'distribuidor', shippingTime: '5-7 días hábiles',  image: 'https://images.unsplash.com/photo-1617897903246-719242758050?w=400&h=400&fit=crop',        badge: null },
-            { id: 5,  name: 'Poremizing Velvet Finish Sunscreen',       category: 'sunscreen', categoryLabel: 'Sun Care',  price: 75, discount: 15, stock: 12, delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&h=400&fit=crop',        badge: 'Popular' },
-            { id: 6,  name: 'Air-Fit Suncream Plus',                    category: 'sunscreen', categoryLabel: 'Sun Care',  price: 75, discount: 0,  stock: 5,  delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1601049541289-9b1b7bbbfe19?w=400&h=400&fit=crop',        badge: 'Nuevo' },
-            { id: 7,  name: 'Rom&nd Juicy Lasting Tint - Breeze Fig',   category: 'makeup',    categoryLabel: 'Maquillaje', price: 50, discount: 0,  stock: 20, delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1586495777744-4413f21062fa?w=400&h=400&fit=crop',        badge: null },
-            { id: 8,  name: 'Tirtir Mask Fit Rosy (Mini)',              category: 'mini',      categoryLabel: 'Minis',     price: 50, discount: 20, stock: 0,  delivery: 'distribuidor', shippingTime: '3-5 días hábiles',  image: 'https://images.unsplash.com/photo-1599305090598-fe179d501227?w=400&h=400&fit=crop',        badge: 'Nuevo' },
-            { id: 9,  name: 'Tirtir Mask Fit Aura (Mini)',              category: 'mini',      categoryLabel: 'Minis',     price: 50, discount: 0,  stock: 0,  delivery: 'distribuidor', shippingTime: '7-10 días hábiles',  image: 'https://images.unsplash.com/photo-1631214524020-7e18db9a8f92?w=400&h=400&fit=crop',        badge: null },
-            { id: 10, name: 'Rom&nd Juicy Lasting Tint - Dark Coconut', category: 'makeup',    categoryLabel: 'Maquillaje', price: 50, discount: 0,  stock: 15, delivery: 'inmediata',   shippingTime: '', image: 'https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?w=400&h=400&fit=crop',        badge: 'Popular' }
-        ];
 
         // ═══════════════════════════════════════════
         // PRODUCTOS — LECTURA/ESCRITURA (compartido con index.html)
@@ -925,15 +969,9 @@
         function getProducts() {
             try {
                 const stored = localStorage.getItem(PRODUCTS_KEY);
-                if (!stored) {
-                    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-                    return DEFAULT_PRODUCTS;
-                }
+                if (!stored) return [];
                 const parsed = JSON.parse(stored);
-                if (!Array.isArray(parsed) || parsed.length === 0) {
-                    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-                    return DEFAULT_PRODUCTS;
-                }
+                if (!Array.isArray(parsed)) return [];
                 // Migrar datos antiguos que no tengan los campos nuevos
                 return parsed.map(p => ({
                     ...productTemplate(),
@@ -942,11 +980,12 @@
                     discount: p.discount || 0,
                     delivery: p.delivery || 'inmediata',
                     shippingTime: p.shippingTime || '',
-                    image: p.image || ''
+                    image: p.image || '',
+                    rating: typeof p.rating === 'number' ? p.rating : 0,
+                    reviewCount: p.reviewCount || 0
                 }));
             } catch {
-                localStorage.setItem(PRODUCTS_KEY, JSON.stringify(DEFAULT_PRODUCTS));
-                return DEFAULT_PRODUCTS;
+                return [];
             }
         }
 
@@ -1068,6 +1107,22 @@
         // ═══════════════════════════════════════════
         let editingProductId = null;
 
+        function setStarSelector(rating) {
+            rating = Math.min(5, Math.max(0, rating));
+            const btns = document.querySelectorAll('.star-selector__btn');
+            btns.forEach((btn, i) => {
+                const pos = i + 1;
+                btn.className = 'star-selector__btn';
+                if (rating >= pos) {
+                    btn.classList.add('active');
+                } else if (rating >= pos - 0.5) {
+                    btn.classList.add('half');
+                }
+            });
+            document.getElementById('starSelectorValue').textContent = rating.toFixed(1);
+            document.getElementById('productRating').value = rating;
+        }
+
         function showAddProductModal() {
             editingProductId = null;
             document.querySelector('#productModal .modal__title').textContent = 'Agregar Producto';
@@ -1078,10 +1133,13 @@
             document.getElementById('productStock').value = '';
             document.getElementById('productDelivery').value = 'inmediata';
             document.getElementById('productShipping').value = '3-5 días hábiles';
+            document.getElementById('productBadge').value = '';
             document.getElementById('productImage').value = '';
             document.getElementById('productImageFile').value = '';
             document.getElementById('imagePreviewContainer').style.display = 'none';
             document.getElementById('shippingTimeGroup').style.display = 'none';
+            setStarSelector(0);
+            document.getElementById('productReviewCount').value = '0';
             document.getElementById('productModal').classList.add('active');
         }
 
@@ -1128,10 +1186,12 @@
             const category = document.getElementById('productCategory').value;
             const delivery = document.getElementById('productDelivery').value;
             const fileInput = document.getElementById('productImageFile');
-            const btn = document.querySelector('#productModal .btn-primary');
+            const btn = document.querySelector('#productModal .submit-btn');
             const originalText = btn.textContent;
 
             let imageUrl = document.getElementById('productImage').value;
+            btn.textContent = 'Guardando...';
+            btn.disabled = true;
 
             // Subir imagen si se seleccionó un archivo nuevo
             if (fileInput.files && fileInput.files[0]) {
@@ -1154,6 +1214,7 @@
                 }
             }
 
+            const badgeVal = document.getElementById('productBadge').value || null;
             const data = {
                 name: document.getElementById('productName').value,
                 category: category,
@@ -1164,7 +1225,9 @@
                 delivery: delivery,
                 shippingTime: delivery === 'distribuidor' ? document.getElementById('productShipping').value : '',
                 image: imageUrl || '',
-                badge: null
+                badge: badgeVal,
+                rating: parseFloat(document.getElementById('productRating').value) || 0,
+                reviewCount: parseInt(document.getElementById('productReviewCount').value) || 0
             };
 
             if (editingProductId) {
@@ -1205,8 +1268,11 @@
             document.getElementById('productStock').value = p.stock;
             document.getElementById('productDelivery').value = p.delivery || 'inmediata';
             document.getElementById('productShipping').value = p.shippingTime || '3-5 días hábiles';
+            document.getElementById('productBadge').value = p.badge || '';
             document.getElementById('productImage').value = p.image || '';
             document.getElementById('productImageFile').value = '';
+            setStarSelector(typeof p.rating === 'number' ? p.rating : 0);
+            document.getElementById('productReviewCount').value = p.reviewCount || 0;
             // Mostrar preview de imagen existente
             const previewContainer = document.getElementById('imagePreviewContainer');
             const previewImg = document.getElementById('imagePreview');
@@ -1244,6 +1310,25 @@
         }
 
         // ═══════════════════════════════════════════
+        // CONFIGURACIÓN (Delivery fee)
+        // ═══════════════════════════════════════════
+        function loadSettings() {
+            try {
+                const stored = JSON.parse(localStorage.getItem('betaskincare_settings')) || {};
+                const fee = stored.deliveryFee || 10;
+                document.getElementById('deliveryFeeInput').value = fee;
+            } catch {
+                document.getElementById('deliveryFeeInput').value = 10;
+            }
+        }
+
+        function saveSettings() {
+            const fee = parseFloat(document.getElementById('deliveryFeeInput').value) || 0;
+            localStorage.setItem('betaskincare_settings', JSON.stringify({ deliveryFee: fee }));
+            alert('✓ Configuración guardada');
+        }
+
+        // ═══════════════════════════════════════════
         // NAVEGACIÓN
         // ═══════════════════════════════════════════
         document.addEventListener('DOMContentLoaded', () => {
@@ -1251,7 +1336,19 @@
                 showAdmin();
                 renderProducts();
                 updateStats();
+                loadSettings();
             }
+
+            // Star selector click
+            document.getElementById('starSelector').addEventListener('click', function(e) {
+                const btn = e.target.closest('.star-selector__btn');
+                if (!btn) return;
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const pos = parseInt(btn.dataset.pos);
+                const rating = x < rect.width / 2 ? pos - 0.5 : pos;
+                setStarSelector(rating);
+            });
 
             document.querySelectorAll('.admin-nav__item[data-section]').forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -1273,15 +1370,15 @@
                     };
                     document.getElementById('sectionTitle').textContent = titles[section] || section;
 
-                    // Render bajo demanda
                     if (section === 'products') renderProducts();
                     if (section === 'stock') renderStockView();
                     if (section === 'dashboard') updateStats();
+                    if (section === 'settings') loadSettings();
                 });
             });
 
             // Sincronizar desde Firestore (asíncrono, no bloquea)
-            syncProductsFromFirebase().then(synced => {
+            if (typeof syncProductsFromFirebase === 'function') syncProductsFromFirebase().then(synced => {
                 if (synced) {
                     const activeSection = document.querySelector('.content-section.active');
                     if (activeSection) {
