@@ -57,19 +57,69 @@ export interface CategoryItem {
   name: string;
   label: string;
   type: "category" | "brand";
-  logoUrl?: string;
+  tagline?: string;
+  badge?: string;
+  image?: string;
 }
 
 export const DEFAULT_CATEGORIES: CategoryItem[] = [
   { id: "sunscreen", name: "sunscreen", label: "Sun Care", type: "category" },
   { id: "makeup", name: "makeup", label: "Maquillaje", type: "category" },
   { id: "mini", name: "mini", label: "Minis", type: "category" },
-  { id: "cosrx", name: "cosrx", label: "COSRX", type: "brand" },
-  { id: "beauty-of-joseon", name: "beauty-of-joseon", label: "Beauty of Joseon", type: "brand" },
-  { id: "anua", name: "anua", label: "Anua", type: "brand" },
-  { id: "skin1004", name: "skin1004", label: "SKIN1004", type: "brand" },
-  { id: "round-lab", name: "round-lab", label: "Round Lab", type: "brand" },
-  { id: "laneige", name: "laneige", label: "Laneige", type: "brand" }
+  { 
+    id: "cosrx", 
+    name: "cosrx", 
+    label: "COSRX", 
+    type: "brand",
+    tagline: "Fórmulas minimalistas de alta efectividad con mucina de caracol y BHA",
+    badge: "Top Ventas K-Beauty",
+    image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=300&fit=crop"
+  },
+  { 
+    id: "beauty-of-joseon", 
+    name: "beauty-of-joseon", 
+    label: "Beauty of Joseon", 
+    type: "brand",
+    tagline: "Medicina tradicional coreana (Hanbang) infusionada con ciencia moderna",
+    badge: "Viral Mundial",
+    image: "https://images.unsplash.com/photo-1608248597263-0057e05b4b74?w=400&h=300&fit=crop"
+  },
+  { 
+    id: "anua", 
+    name: "anua", 
+    label: "Anua", 
+    type: "brand",
+    tagline: "Especialistas en calmar pieles sensibles y propensas al acné con Heartleaf",
+    badge: "Piel Radiante",
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop"
+  },
+  { 
+    id: "skin1004", 
+    name: "skin1004", 
+    label: "SKIN1004", 
+    type: "brand",
+    tagline: "Centella Asiática pura de Madagascar para restaurar y calmar tu rostro",
+    badge: "100% Botánico",
+    image: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=300&fit=crop"
+  },
+  { 
+    id: "round-lab", 
+    name: "round-lab", 
+    label: "Round Lab", 
+    type: "brand",
+    tagline: "Hidratación profunda con agua de las profundidades de la Isla Dokdo",
+    badge: "Nº1 en Corea",
+    image: "https://images.unsplash.com/photo-1616683693504-3ea7e9ad6fec?w=400&h=300&fit=crop"
+  },
+  { 
+    id: "laneige", 
+    name: "laneige", 
+    label: "Laneige", 
+    type: "brand",
+    tagline: "Expertos en barrera de humedad y mascarillas labiales icónicas",
+    badge: "Lujo Accesible",
+    image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&h=300&fit=crop"
+  }
 ];
 
 export const CATEGORY_LABELS: Record<string, string> = {
@@ -140,29 +190,6 @@ export async function deleteProductFromFirebase(productId: number): Promise<void
   }
 }
 
-// 4. Subir imagen a Firebase Storage (con fallback seguro a DataURL en caso de fallar reglas de Storage)
-export async function uploadProductImage(file: File, productId: string | number): Promise<string> {
-  try {
-    const timestamp = Date.now();
-    const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const path = `products/${productId}/${timestamp}_${safeName}`;
-    const storageRef = ref(storage, path);
-    
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    return downloadURL;
-  } catch (error) {
-    console.warn("Storage upload warn, convirtiendo a DataURL de respaldo:", error);
-    return new Promise((resolve) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        resolve(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-}
-
 // ──────── OPERACIONES CRUD DE CATEGORÍAS Y MARCAS ────────
 
 export async function getCategoriesFromFirebase(): Promise<CategoryItem[]> {
@@ -183,7 +210,8 @@ export async function getCategoriesFromFirebase(): Promise<CategoryItem[]> {
 export async function saveCategoryToFirebase(category: CategoryItem): Promise<void> {
   try {
     const refDoc = doc(db, CATEGORIES_COLLECTION, category.id);
-    await setDoc(refDoc, category);
+    const cleanCat = JSON.parse(JSON.stringify(category, (key, value) => value === undefined ? "" : value));
+    await setDoc(refDoc, cleanCat);
   } catch (error) {
     console.warn("Save category Firestore error:", error);
   }

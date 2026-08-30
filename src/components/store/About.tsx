@@ -14,7 +14,7 @@ export const About: React.FC = () => {
     {
       icon: <Sparkles className="w-6 h-6 text-brand-primary-dark" />,
       title: "Lo Último en K-Beauty",
-      desc: "Traemos las tendencias más virales e innovadoras del cuidado facial coreano para que logres tu rutina perfecta."
+      desc: "Traemos las tendencias más virales e innovadoras del cuidado facial coreano para que logres tu rutina perfecta y hacemos envios a cualquier parte del Perú."
     },
     {
       icon: <Heart className="w-6 h-6 text-brand-primary-dark" />,

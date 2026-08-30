@@ -109,11 +109,11 @@ export const Footer: React.FC = () => {
             </li>
             <li className="flex items-center gap-2">
               <Phone className="w-4 h-4 text-brand-primary-dark shrink-0" />
-              <span>918 602 852</span>
+              <span>912 667 200</span>
             </li>
             <li className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-brand-primary-dark shrink-0" />
-              <span>Lima, Perú</span>
+              <span>Cajamarca, Perú</span>
             </li>
             <li className="flex items-center gap-1 mt-2 text-[10px] bg-brand-primary-light/50 border border-brand-primary-dark/10 p-2 rounded-xl">
               <Sparkles className="w-3.5 h-3.5 text-brand-primary-dark shrink-0" />

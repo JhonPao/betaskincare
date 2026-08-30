@@ -93,6 +93,9 @@ export default function AdminPage() {
   // Formulario Agregar/Editar Categoría o Marca
   const [newCatLabel, setNewCatLabel] = useState("");
   const [newBrandLabel, setNewBrandLabel] = useState("");
+  const [newBrandTagline, setNewBrandTagline] = useState("");
+  const [newBrandBadge, setNewBrandBadge] = useState("");
+  const [newBrandImage, setNewBrandImage] = useState("");
 
   // Formulario Agregar/Editar Producto
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -212,7 +215,10 @@ export default function AdminPage() {
       id: slug,
       name: slug,
       label: newBrandLabel.trim(),
-      type: "brand"
+      type: "brand",
+      tagline: newBrandTagline.trim() || undefined,
+      badge: newBrandBadge.trim() || undefined,
+      image: newBrandImage.trim() || undefined
     };
 
     const updated = [...categoriesList, newBrand];
@@ -220,6 +226,9 @@ export default function AdminPage() {
     localStorage.setItem("betaskincare_categories", JSON.stringify(updated));
     await saveCategoryToFirebase(newBrand);
     setNewBrandLabel("");
+    setNewBrandTagline("");
+    setNewBrandBadge("");
+    setNewBrandImage("");
     alert("✓ Marca de cosmética agregada exitosamente");
   };
 
@@ -975,7 +984,7 @@ export default function AdminPage() {
                 <form onSubmit={handleAddBrand} className="space-y-3">
                   <div>
                     <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
-                      Nombre de la Marca
+                      Nombre de la Marca *
                     </label>
                     <Input 
                       type="text" 
@@ -987,7 +996,48 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <Button type="submit" className="w-full rounded-full bg-linear-to-r from-primary to-brand-primary-dark text-white text-xs py-5 cursor-pointer shadow-xs font-semibold">
+                  <div>
+                    <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                      Eslogan / Descripción Corta (Opcional)
+                    </label>
+                    <Input 
+                      type="text" 
+                      value={newBrandTagline}
+                      onChange={(e) => setNewBrandTagline(e.target.value)}
+                      placeholder="Ej. Fórmulas veganas y ligeras"
+                      className="bg-stone-50 border-stone-200 text-xs"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                        Etiqueta / Badge (Opcional)
+                      </label>
+                      <Input 
+                        type="text" 
+                        value={newBrandBadge}
+                        onChange={(e) => setNewBrandBadge(e.target.value)}
+                        placeholder="Ej. Tendencia Seúl"
+                        className="bg-stone-50 border-stone-200 text-xs"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider block mb-1">
+                        URL de Imagen (Opcional)
+                      </label>
+                      <Input 
+                        type="url" 
+                        value={newBrandImage}
+                        onChange={(e) => setNewBrandImage(e.target.value)}
+                        placeholder="https://..."
+                        className="bg-stone-50 border-stone-200 text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <Button type="submit" className="w-full rounded-full bg-linear-to-r from-primary to-brand-primary-dark text-white text-xs py-5 cursor-pointer shadow-xs font-semibold mt-1">
                     + Agregar Marca
                   </Button>
                 </form>
