@@ -477,7 +477,7 @@ export default function AdminPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@betaskincare.pe"
+                  placeholder="Usuario"
                   className="bg-stone-50 border-stone-200 pl-10"
                 />
               </div>
@@ -616,84 +616,215 @@ export default function AdminPage() {
           </div>
         </header>
 
-        {/* 1. DASHBOARD GRÁFICO */}
+        {/* 1. DASHBOARD GRÁFICO MODERNIZADO */}
         {activeSection === "dashboard" && (
           <div className="space-y-8 animate-fadeIn">
-            {/* Tarjetas Estadísticas */}
+            {/* Tarjetas Estadísticas Ejecutivas */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-white rounded-3xl p-6 border border-brand-primary-dark/10 shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-brand-text-muted">
-                  Total Productos
-                </span>
-                <h3 className="text-3xl font-extrabold text-foreground mt-2">{products.length}</h3>
-                <span className="text-xs text-green-600 font-semibold mt-1 inline-block">en catálogo</span>
+              {/* Tarjeta 1: Total Productos */}
+              <div className="bg-white rounded-3xl p-6 border border-brand-primary-dark/10 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:border-brand-primary-dark/30 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-brand-text-muted">
+                    Catálogo K-Beauty
+                  </span>
+                  <div className="w-10 h-10 rounded-2xl bg-brand-primary-light flex items-center justify-center text-brand-primary-dark font-bold text-sm">
+                    🌸
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-4xl font-extrabold text-foreground tracking-tight">{products.length}</h3>
+                  <p className="text-xs text-brand-text-light font-medium mt-1">
+                    Productos activos en <span className="font-bold text-brand-primary-dark">{categoriesList.filter(c => c.type === "category").length} categorías</span>
+                  </p>
+                </div>
               </div>
-              <div className="bg-white rounded-3xl p-6 border border-brand-primary-dark/10 shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-brand-text-muted">
-                  Bajo Stock (≤ 3 unids)
-                </span>
-                <h3 className="text-3xl font-extrabold text-orange-500 mt-2">{lowStockCount}</h3>
-                <span className="text-xs text-orange-600/80 font-semibold mt-1 inline-block">requieren atención</span>
+
+              {/* Tarjeta 2: Bajo Stock */}
+              <div className="bg-white rounded-3xl p-6 border border-brand-primary-dark/10 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:border-orange-300 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-brand-text-muted">
+                    Salud del Inventario
+                  </span>
+                  <div className="w-10 h-10 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 font-bold text-sm">
+                    ⚠️
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-4xl font-extrabold text-orange-500 tracking-tight">{lowStockCount}</h3>
+                  <p className="text-xs text-orange-600/90 font-medium mt-1">
+                    {lowStockCount > 0 ? "Productos requieren reposición urgente" : "Todo el inventario está en óptimo estado"}
+                  </p>
+                </div>
               </div>
-              <div className="bg-white rounded-3xl p-6 border border-brand-primary-dark/10 shadow-xs">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-brand-text-muted">
-                  Valor de Inventario
-                </span>
-                <h3 className="text-3xl font-extrabold text-brand-primary-dark mt-2">
-                  S/. {totalValue.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
-                </h3>
-                <span className="text-xs text-brand-text-muted font-semibold mt-1 inline-block font-sans">estimado en tienda</span>
+
+              {/* Tarjeta 3: Valor del Inventario */}
+              <div className="bg-white rounded-3xl p-6 border border-brand-primary-dark/10 shadow-xs flex flex-col justify-between relative overflow-hidden group hover:border-brand-primary-dark/30 transition-all">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-brand-text-muted">
+                    Valor Estimado
+                  </span>
+                  <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-brand-accent-main font-bold text-sm">
+                    💰
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <h3 className="text-3xl font-extrabold text-brand-primary-dark tracking-tight">
+                    S/. {totalValue.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
+                  </h3>
+                  <p className="text-xs text-brand-text-light font-medium mt-1">
+                    Valor total de stock en almacén
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* GRÁFICOS RECHARTS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-white p-6 rounded-3xl border border-brand-primary-dark/10 shadow-xs flex flex-col">
-                <h3 className="font-serif text-base font-bold mb-4 flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5 text-brand-primary-dark" />
-                  Productos por Categoría
-                </h3>
+            {/* GRÁFICOS RECHARTS RE-DISEÑADOS */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Gráfico 1: Categorías de Producto */}
+              <div className="bg-white p-7 rounded-3xl border border-brand-primary-dark/10 shadow-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-foreground flex items-center gap-2">
+                      <BarChart3 className="w-5 h-5 text-brand-primary-dark" />
+                      Distribución por Categoría
+                    </h3>
+                    <p className="text-xs text-stone-500 mt-0.5">Cantidad de variedad por cada sección</p>
+                  </div>
+                  <span className="text-xs font-bold text-brand-primary-dark px-3 py-1 bg-brand-primary-light rounded-full">
+                    {categoriesList.filter(c => c.type === "category").length} Categorías
+                  </span>
+                </div>
+
                 <div className="h-64 w-full">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={categoryChartData}>
-                      <XAxis dataKey="name" stroke="#8D7B6B" fontSize={12} />
-                      <YAxis stroke="#8D7B6B" fontSize={12} allowDecimals={false} />
+                    <BarChart data={categoryChartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <XAxis dataKey="name" stroke="#A39387" fontSize={11} tickLine={false} axisLine={false} />
+                      <YAxis stroke="#A39387" fontSize={11} tickLine={false} axisLine={false} allowDecimals={false} />
                       <Tooltip 
-                        contentStyle={{ backgroundColor: '#FAF7F5', borderRadius: '12px', border: '1px solid #EBE5E0' }} 
+                        contentStyle={{ 
+                          backgroundColor: '#FFFFFF', 
+                          borderRadius: '16px', 
+                          border: '1px solid rgba(244, 167, 185, 0.3)',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08)'
+                        }} 
                       />
-                      <Bar dataKey="count" fill="#F4A7B9" radius={[8, 8, 0, 0]} name="Cantidad" />
+                      <Bar dataKey="count" fill="#F4A7B9" radius={[10, 10, 0, 0]} name="Productos" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-3xl border border-brand-primary-dark/10 shadow-xs flex flex-col">
-                <h3 className="font-serif text-base font-bold mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-brand-primary-dark" />
-                  Estado del Inventario
-                </h3>
-                <div className="h-64 w-full flex items-center justify-center">
+              {/* Gráfico 2: Donut Chart de Stock Sin Textos Encimados */}
+              <div className="bg-white p-7 rounded-3xl border border-brand-primary-dark/10 shadow-xs flex flex-col justify-between">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-foreground flex items-center gap-2">
+                      <AlertTriangle className="w-5 h-5 text-brand-primary-dark" />
+                      Estado del Inventario
+                    </h3>
+                    <p className="text-xs text-stone-500 mt-0.5">Proporción de unidades disponibles</p>
+                  </div>
+                  <span className="text-xs font-bold text-stone-600 px-3 py-1 bg-stone-100 rounded-full">
+                    {products.length} Total
+                  </span>
+                </div>
+
+                <div className="h-64 w-full flex items-center justify-center relative">
                   <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                       <Pie
                         data={stockChartData}
                         cx="50%"
                         cy="50%"
-                        innerRadius={60}
-                        outerRadius={90}
-                        paddingAngle={5}
+                        innerRadius={65}
+                        outerRadius={95}
+                        paddingAngle={6}
                         dataKey="value"
-                        label
+                        label={false}
                       >
                         {stockChartData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={["#70B683", "#F5A623", "#E75B70"][index]} />
                         ))}
                       </Pie>
-                      <Tooltip />
-                      <Legend verticalAlign="bottom" height={36} />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: '#FFFFFF', 
+                          borderRadius: '16px', 
+                          border: '1px solid rgba(0,0,0,0.08)',
+                          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.08)'
+                        }} 
+                      />
                     </PieChart>
                   </ResponsiveContainer>
+
+                  {/* Leyenda pulcra de centro */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <span className="text-2xl font-extrabold text-foreground">{products.length}</span>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest">Unidades</span>
+                  </div>
                 </div>
+
+                {/* Leyenda inferior pulcra y limpia */}
+                <div className="flex justify-center items-center gap-6 pt-4 border-t border-stone-100 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#70B683]" />
+                    <span className="text-stone-600 font-semibold">En Stock ({products.filter(p => p.stock > 3).length})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#F5A623]" />
+                    <span className="text-stone-600 font-semibold">Stock Bajo ({products.filter(p => p.stock > 0 && p.stock <= 3).length})</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-[#E75B70]" />
+                    <span className="text-stone-600 font-semibold">Agotados ({products.filter(p => p.stock === 0).length})</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* WIDGET DE RESUMEN RÁPIDO DE INVENTARIO */}
+            <div className="bg-white p-7 rounded-3xl border border-brand-primary-dark/10 shadow-xs">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="font-serif text-lg font-bold text-foreground">Vista Rápida de Inventario</h3>
+                  <p className="text-xs text-stone-500 mt-0.5">Últimos productos agregados y su estado actual</p>
+                </div>
+                <Button 
+                  onClick={() => setActiveSection("products")} 
+                  variant="outline" 
+                  className="rounded-full text-xs cursor-pointer hover:bg-brand-primary-light hover:text-brand-primary-dark font-semibold"
+                >
+                  Ver todos los productos →
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                {products.slice(0, 4).map((p) => (
+                  <div key={p.id} className="p-4 rounded-2xl border border-stone-100 bg-stone-50/50 flex flex-col justify-between">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-white border border-stone-200 p-1 flex items-center justify-center overflow-hidden shrink-0">
+                        {p.image ? (
+                          <img src={p.image} alt="" className="max-h-full max-w-full object-contain" />
+                        ) : (
+                          <span className="text-xs">🌸</span>
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-foreground truncate">{p.name}</h4>
+                        <span className="text-[10px] text-stone-400 font-medium block">{p.categoryLabel}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs pt-2 border-t border-stone-200/60">
+                      <span className="font-extrabold text-foreground">S/. {p.price.toFixed(2)}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                        p.stock === 0 ? "bg-red-100 text-red-700" : p.stock <= 3 ? "bg-orange-100 text-orange-700" : "bg-green-100 text-green-700"
+                      }`}>
+                        {p.stock} unids
+                      </span>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
