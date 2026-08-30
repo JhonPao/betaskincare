@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pinkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDDDE6" />
+      <stop offset="50%" stop-color="#F4A7B9" />
+      <stop offset="100%" stop-color="#E891A3" />
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="6" stdDeviation="8" flood-color="#E891A3" flood-opacity="0.4" />
+    </filter>
+  </defs>
+  
+  <!-- Fondo Rosado Cute Redondeado -->
+  <rect width="512" height="512" rx="160" fill="url(#pinkGrad)" />
+  
+  <!-- Borde Interno Delicado -->
+  <rect x="24" y="24" width="464" height="464" rx="140" fill="none" stroke="#FFFFFF" stroke-opacity="0.4" stroke-width="10" />
+
+  <!-- Letra 'B' Elegante y Cute -->
+  <path d="M165 110 H275 C330 110 370 140 370 190 C370 225 345 250 315 260 C355 272 385 305 385 350 C385 405 340 435 280 435 H165 Z M225 160 V240 H270 C298 240 318 225 318 200 C318 175 298 160 270 160 Z M225 285 V385 H280 C312 385 332 368 332 335 C332 302 312 285 280 285 Z" fill="#FFFFFF" filter="url(#softShadow)" />
+
+  <!-- Destello K-Beauty Cute -->
+  <path d="M390 95 L396 75 L402 95 L422 101 L402 107 L396 127 L390 107 L370 101 Z" fill="#FFFFFF" />
+  <circle cx="435" cy="140" r="12" fill="#FFFFFF" opacity="0.9" />
+</svg>

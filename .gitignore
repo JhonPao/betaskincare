@@ -1,20 +1,41 @@
-# OS
-Thumbs.db
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
 .DS_Store
-desktop.ini
+*.pem
 
-# Editor
-*.swp
-*.swo
-*~
-.vscode/
-.idea/
-
-# Firebase (nunca subir credenciales reales)
-# Cuando reemplaces los placeholders en firebase-config.js con claves reales,
-# descomenta la línea siguiente para evitar subirlas al repositorio:
-# firebase-config.js
-
-# Logs
-*.log
+# debug
 npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
