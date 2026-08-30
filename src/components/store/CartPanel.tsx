@@ -145,7 +145,7 @@ export const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
                       : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
                   }`}
                 >
-                  🚴 Envío a Domicilio
+                   Envío a Domicilio
                 </button>
                 <button
                   type="button"
@@ -156,7 +156,7 @@ export const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
                       : "bg-white border-stone-200 text-stone-600 hover:bg-stone-50"
                   }`}
                 >
-                  🛍️ Recojo en Tienda
+                   Recojo en Tienda
                 </button>
               </div>
 
@@ -231,7 +231,7 @@ export const CartPanel: React.FC<CartPanelProps> = ({ isOpen, onClose }) => {
                     <option value="yape">Yape</option>
                     <option value="plin">Plin</option>
                     <option value="transferencia">Transferencia Bancaria (BCP/BBVA)</option>
-                    <option value="efectivo">Efectivo contra entrega (Solo Lima)</option>
+                    <option value="efectivo">Efectivo contra entrega (Solo Cajamarca)</option>
                   </select>
                 </div>
               </div>
